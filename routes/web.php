@@ -13,6 +13,7 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/tickets/{ticket}/comments', [TicketController::class, 'showComments'])->name('tickets.comments');
 
 // Routes for Comments
 Route::resource('comments', CommentController::class)->middleware('auth');

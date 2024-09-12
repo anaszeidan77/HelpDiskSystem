@@ -4,14 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
     public function index()
     {
-        $comments = Comment::all();
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            // عرض كل التعليقات
+            $comments = Comment::with('ticket', 'user')->get();
+        } else {
+            // عرض التعليقات الخاصة بالتذاكر التي تخص المستخدم
+            $comments = Comment::where('user_id', $user->id)->with('ticket', 'user')->get();
+        }
+    
         return view('comments.index', compact('comments'));
     }
+    
 
     public function create()
     {
