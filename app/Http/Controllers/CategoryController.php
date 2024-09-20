@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Activity; // استيراد نموذج الأنشطة
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
@@ -25,7 +27,16 @@ class CategoryController extends Controller
             'code' => 'required|string|max:255',
         ]);
 
-        Category::create($request->all());
+        $category = Category::create($request->all());
+
+        // تسجيل النشاط - إنشاء فئة جديدة
+        $user = Auth::user();
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'created', // نوع النشاط
+            'subject_type' => Category::class,
+            'subject_id' => $category->id,
+        ]);
 
         return redirect()->route('categories.index')
             ->with('success', 'Category created successfully.');
@@ -49,6 +60,14 @@ class CategoryController extends Controller
         ]);
 
         $category->update($request->all());
+        $user = Auth::user();
+        // تسجيل النشاط - تحديث الفئة
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'updated', // نوع النشاط
+            'subject_type' => Category::class,
+            'subject_id' => $category->id,
+        ]);
 
         return redirect()->route('categories.index')
             ->with('success', 'Category updated successfully.');
@@ -57,6 +76,15 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
+        // تسجيل النشاط - حذف الفئة
+        $user = Auth::user();
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'deleted', // نوع النشاط
+            'subject_type' => Category::class,
+            'subject_id' => $category->id,
+        ]);
 
         return redirect()->route('categories.index')
             ->with('success', 'Category deleted successfully.');

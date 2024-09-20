@@ -17,13 +17,24 @@
 
         <div class="mb-4">
             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-            <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50" id="status" name="status" required>
+            <select id="status" name="status" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
+                <option value="">-- Select Status --</option>
+                <option value="open">Open</option>
+                <option value="in_progress">In Progress</option>
+                <option value="closed">Closed</option>
+            </select>
         </div>
-
+        
         <div class="mb-4">
             <label for="priority" class="block text-sm font-medium text-gray-700">Priority</label>
-            <input type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50" id="priority" name="priority" required>
+            <select id="priority" name="priority" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring focus:ring-purple-200 focus:ring-opacity-50">
+                <option value="">-- Select Priority --</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
         </div>
+        
 
         <div class="mb-4">
             <label for="category_id" class="block text-sm font-medium text-gray-700">Category</label>

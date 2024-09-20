@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Ticket;
+use App\Models\Activity; // استيراد نموذج الأنشطة
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +13,10 @@ class TicketController extends Controller
 {
     public function index()
     {
-        $user = Auth::user(); // استخدام Auth Facade بدلاً من auth()
+        $user = Auth::user();
 
         if (!$user) {
-            return redirect()->route('login'); // إعادة التوجيه إذا لم يكن هناك مستخدم
+            return redirect()->route('login');
         }
 
         if ($user->role === 'admin') {
@@ -26,8 +27,6 @@ class TicketController extends Controller
 
         return view('tickets.index', compact('tickets'));
     }
-
-
 
     public function create()
     {
@@ -41,13 +40,22 @@ class TicketController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|string',
-            'priority' => 'required|string',
+            'status' => 'required|in:open,in_progress,closed',
+            'priority' => 'required|in:low,medium,high',
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
         ]);
 
-        Ticket::create($request->all());
+        $ticket = Ticket::create($request->all());
+
+        // تسجيل النشاط - إنشاء تذكرة جديدة
+        $user = Auth::user();
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'created', // نوع النشاط
+            'subject_type' => Ticket::class,
+            'subject_id' => $ticket->id,
+        ]);
 
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket created successfully.');
@@ -70,13 +78,22 @@ class TicketController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'status' => 'required|string',
-            'priority' => 'required|string',
+            'status' => 'required|in:open,in_progress,closed',
+            'priority' => 'required|in:low,medium,high',
             'category_id' => 'required|exists:categories,id',
             'user_id' => 'required|exists:users,id',
         ]);
 
         $ticket->update($request->all());
+
+        // تسجيل النشاط - تحديث تذكرة
+        $user = Auth::user();
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'updated', // نوع النشاط
+            'subject_type' => Ticket::class,
+            'subject_id' => $ticket->id,
+        ]);
 
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket updated successfully.');
@@ -86,12 +103,21 @@ class TicketController extends Controller
     {
         $ticket->delete();
 
+        // تسجيل النشاط - حذف تذكرة
+        $user = Auth::user();
+        Activity::create([
+            'user_id' => $user->id,
+            'action' => 'deleted', // نوع النشاط
+            'subject_type' => Ticket::class,
+            'subject_id' => $ticket->id,
+        ]);
+
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket deleted successfully.');
     }
+
     public function showComments(Ticket $ticket)
     {
-        // تحميل التعليقات الخاصة بالتذكرة المحددة
         $comments = $ticket->comments()->with('user')->get();
 
         return view('tickets.comments', compact('ticket', 'comments'));
